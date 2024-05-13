@@ -2,85 +2,79 @@ const db = require("../models");
 const Auditoria = db.auditoria;
 
 
-exports.createAuditTable = async (req, res, datos, direccionIp, agenteUsuario) => {
- 
-  if (req.body.length === 0) {
-    res.status(400).send({
-      message: "No puede venir sin datos",
-    });
-    return;
-  }
+exports.createAuditTable = async (req, datos, direccionIp, agenteUsuario) => {
+  
+  try {
+    
+    const { user, body, method, id: reqId } = req;
+    if (!user || !user.id) {
+      throw new Error("Usuario no autenticado o falta el ID de usuario.");
+    }
 
-    const idUsuario = req.user.id;
-    const nombreUsuario =  req.user.nombreUsuario;
-    const rol =  req.user.rol;
-    const metodo = req.method;
+    if (Object.keys(body).length === 0) {
+      throw new Error("No puede venir sin datos");
+    }
+
+    const { id, nombreUsuario, rol } = user;
     const nombre = req.originalUrl.substring(6);
     let datosAntiguos = null;
     let datosNuevos = null;
     let accion = null;
- 
-    if(metodo === 'POST'){
+
+    if (method === 'POST') {
       accion = "Creación";
-      const id = req.id;
-  
-      const keys = Object.keys(req.body);
-      // Verificar si hay al menos una clave en el objeto
-      if (keys.length > 0) {
-        // Reemplazar el valor del primer elemento con el ID
-        req.body[keys[0]] = id;
+      if (reqId) {
+        body[Object.keys(body)[0]] = reqId;
       }
-
-     datosNuevos = Object.entries(req.body).map(([clave, valor]) => `${clave}: ${valor}`).join(', ');
-
-    }
-
-    if(metodo === 'PUT'){
+      datosNuevos = parseDataToString(body);
+    } else if (method === 'PUT') {
       accion = "Actualización";
-      let datosFiltrados = {};  
-      Object.keys(req.body).forEach(key => {
-        if(datos.hasOwnProperty(key) && req.body[key] !== datos[key]){
-            datosFiltrados[key] = datos[key];
-        }
-    })
-
-    let datosFiltrados2 = {};  
-      Object.keys(datosFiltrados).forEach(key => {
-        if(req.body.hasOwnProperty(key) && datosFiltrados[key] !== req.body[key]){
-            datosFiltrados2[key] = req.body[key];
-        }
-    })
-
-    datosAntiguos = Object.entries(datosFiltrados).map(([clave, valor]) => `${clave}: ${valor}`).join(', ');
-    datosNuevos = Object.entries(datosFiltrados2).map(([clave, valor]) => `${clave}: ${valor}`).join(', ');
-
-
-    }
-    if(metodo === 'DELETE'){
+      const filtrarDatos = filtrarCambios(datos, body);
+      datosAntiguos = parseDataToString(filtrarDatos.datosAntiguos);
+      datosNuevos = parseDataToString(filtrarDatos.NuevosDatos);
+    } else if (method === 'DELETE') {
       accion = "Eliminación";
-      datosAntiguos = Object.entries(datos).map(([clave, valor]) => `${clave}: ${valor}`).join(', ');
+      datosAntiguos = parseDataToString(datos);
     }
 
-    Auditoria.create({
-        idUsuario,
-        nombreUsuario,
-        rol,
-        accion,
-        nombre,
-        datosAntiguos,
-        datosNuevos,
-        direccionIp,
-        agenteUsuario
-    })
-    .then((data) => {
-
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Ocurrió un error al crear la auditoria.",
-      });
+    await Auditoria.create({
+      idUsuario: id,
+      nombreUsuario,
+      rol,
+      accion,
+      nombre,
+      datosAntiguos,
+      datosNuevos,
+      direccionIp,
+      agenteUsuario
     });
+
+    return null;
+  } catch (error) {
+    return error;
+  }
 };
+
+function filtrarCambios(datosAntiguos, NuevosDatos) {
+  const filtrarDatosAntiguos = {};
+  const filtrarNuevosDatos = {};
+
+  Object.keys(NuevosDatos).forEach(key => {
+    if (datosAntiguos.hasOwnProperty(key) && NuevosDatos[key] !== datosAntiguos[key]) {
+      filtrarDatosAntiguos[key] = datosAntiguos[key];
+      filtrarNuevosDatos[key] = NuevosDatos[key];
+    }
+  });
+
+  return { datosAntiguos: filtrarDatosAntiguos, NuevosDatos: filtrarNuevosDatos };
+}
+
+
+function parseDataToString(data) {
+  return Object.entries(data).map(([key, value]) => `${key}: ${value}`).join(', ');
+}
+
+
 
 exports.findAllAuditTables = async (req, res) => {
     try {

@@ -8,11 +8,11 @@ const auditTables = async (req, res, next) => {
             const datos = req.datos;
             const direccionIp = req.ip || req.connection.remoteAddress;
             const agenteUsuario = req.get('user-agent') || 'unknown';
-            await createAuditTable(req, res, datos, direccionIp, agenteUsuario);
+            await createAuditTable(req, datos, direccionIp, agenteUsuario);
 
         }catch(error) {
             console.error(error);
-          }
+        }
     next();
 };
 
