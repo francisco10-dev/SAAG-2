@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize');
+const mysql2 = require('mysql2');
 const {
   DB_USER, DB_PASSWORD, DB_HOST, DB_NAME,DB_PORT
 } = process.env;
@@ -7,6 +8,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   host: DB_HOST,
   port:DB_PORT,
   dialect: 'mysql',
+  dialectModule: mysql2,
   timezone: '-06:00',
   define: {
       freezeTableName: true
