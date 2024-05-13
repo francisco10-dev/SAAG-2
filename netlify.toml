@@ -3,6 +3,6 @@
     functions= "functions"
 
 [[redirects]]
-    from = "/*"
-    to = "/.netlify/functions/index"
+    from = "/saag/*"
+    to = "/.netlify/functions/index/saag/:splat"
     status = 200

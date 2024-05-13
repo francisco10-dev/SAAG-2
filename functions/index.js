@@ -13,20 +13,20 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Define las rutas del API
-app.use('/.netlify/functions/index/saag', require('../routes/solicitud.routes'));
-app.use('/.netlify/functions/index/saag', require('../routes/ausencia.routes'));
-app.use('/.netlify/functions/index/saag', require('../routes/usuario.routes'));
-app.use('/.netlify/functions/index/saag', require('../routes/colaborador.routes'));
-app.use('/.netlify/functions/index/saag', require('../routes/horasExtra.routes'));
-app.use('/.netlify/functions/index/saag', require('../routes/puesto.routes'));
-app.use('/.netlify/functions/index/saag', require('../routes/auditoria.routes'));
-app.use('/.netlify/functions/index/saag', require('../routes/auditoriaLogin.routes'));
-app.use('/.netlify/functions/index/saag', require('../routes/expediente.routes'));
-app.use('/.netlify/functions/index/saag', require('../routes/documento.routes'));
-app.use('/.netlify/functions/index/saag', require('../routes/telefono.routes'));
+app.use('/saag', require('../routes/solicitud.routes'));
+app.use('/saag', require('../routes/ausencia.routes'));
+app.use('/saag', require('../routes/usuario.routes'));
+app.use('/saag', require('../routes/colaborador.routes'));
+app.use('/saag', require('../routes/horasExtra.routes'));
+app.use('/saag', require('../routes/puesto.routes'));
+app.use('/saag', require('../routes/auditoria.routes'));
+app.use('/saag', require('../routes/auditoriaLogin.routes'));
+app.use('/saag', require('../routes/expediente.routes'));
+app.use('/saag', require('../routes/documento.routes'));
+app.use('/saag', require('../routes/telefono.routes'));
 app.use(auditTables);
 
-app.use('/.netlify/functions/index/saag', require('../routes/login.routes'));
+app.use('/saag', require('../routes/login.routes'));
 
 // Sincroniza la base de datos
 db.sequelize.sync().then(() => {
