@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const db = require('./models');
 const {auditTables} = require('./middlewares/audit.middleware');
+const serverless = require('serverless-http');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -34,7 +35,7 @@ db.sequelize.sync().then(() => {
   });
 });
 
-module.exports = app;
+module.exports.handler = serverless(app);
 
 //opciones de ejecucion
 // - node index.js
